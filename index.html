@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkQuest - Holiday Extras</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --hx-deep-purple: #1a0a2e;
+            --hx-mid-purple: #2e1550;
+            --hx-purple: #5C2D91;
+            --hx-yellow: #FFD100;
+            --hx-yellow-bright: #FFE44C;
+            --hx-white: #f0f0f0;
+            --hx-black: #1a1a1a;
+            --hx-blue: #3AA6FF;
+            --hx-green: #00B0A6;
+            --hx-orange: #FFB55F;
+            --hx-red: #FF5F68;
+            --pixel-font: 'Press Start 2P', monospace;
+        }
+
+        body {
+            font-family: var(--pixel-font);
+            background: var(--hx-deep-purple);
+            color: var(--hx-white);
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
+            width: 100vw;
+            image-rendering: pixelated;
+        }
+
+        /* ===== STARFIELD BACKGROUND ===== */
+        .starfield {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--dur) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* ===== GAME CONTAINER ===== */
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        /* ===== HEADER / LOGO ===== */
+        .game-header {
+            text-align: center;
+            padding: 20px 20px 10px;
+        }
+
+        .game-title {
+            font-size: 28px;
+            color: var(--hx-yellow);
+            text-shadow: 3px 3px 0 #c9a200, 6px 6px 0 rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        .game-subtitle {
+            font-size: 11px;
+            color: var(--hx-blue);
+            margin-top: 8px;
+            letter-spacing: 4px;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        /* ===== PROGRESS ROAD ===== */
+        .progress-road {
+            width: 90%;
+            max-width: 700px;
+            height: 50px;
+            position: relative;
+            margin: 10px auto;
+        }
+
+        .road-surface {
+            position: absolute;
+            top: 18px;
+            left: 0;
+            right: 0;
+            height: 14px;
+            background: #3a1860;
+            border-radius: 7px;
+            overflow: hidden;
+        }
+
+        .road-dashes {
+            position: absolute;
+            top: 5px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--hx-yellow) 0px,
+                var(--hx-yellow) 15px,
+                transparent 15px,
+                transparent 30px
+            );
+            animation: roadScroll 1s linear infinite;
+        }
+
+        @keyframes roadScroll {
+            to { transform: translateX(-30px); }
+        }
+
+        .progress-stops {
+            position: absolute;
+            top: 0;
+            left: 5%;
+            right: 5%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-stop {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3a1860;
+            border: 3px solid #6a3d9a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            transition: all 0.3s;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .progress-stop.active {
+            background: var(--hx-yellow);
+            border-color: var(--hx-yellow-bright);
+            color: var(--hx-deep-purple);
+            transform: scale(1.3);
+            box-shadow: 0 0 15px var(--hx-yellow);
+        }
+
+        .progress-stop.completed {
+            background: var(--hx-green);
+            border-color: #00c4b6;
+            color: white;
+        }
+
+        .progress-stop-label {
+            position: absolute;
+            bottom: -16px;
+            font-size: 7px;
+            white-space: nowrap;
+            color: #a090c0;
+        }
+
+        .progress-stop.active .progress-stop-label,
+        .progress-stop.completed .progress-stop-label {
+            color: var(--hx-white);
+        }
+
+        /* ===== PIXEL CAR ON PROGRESS ===== */
+        .progress-car {
+            position: absolute;
+            top: -2px;
+            transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 3;
+            filter: drop-shadow(0 0 8px rgba(255, 209, 0, 0.5));
+        }
+
+        /* ===== SCENE AREA ===== */
+        .scene-area {
+            flex: 1;
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            position: relative;
+        }
+
+        /* ===== STEP PANELS ===== */
+        .step-panel {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .step-panel.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(80px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .step-title {
+            font-size: 18px;
+            color: var(--hx-yellow);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+        }
+
+        .step-hint {
+            font-size: 9px;
+            color: var(--hx-blue);
+            margin-bottom: 18px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* ===== AIRPORT SELECTION ===== */
+        .airport-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .airport-sign {
+            background: #2e1555;
+            border: 3px solid #5C2D91;
+            border-radius: 8px;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .airport-sign::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--hx-purple);
+        }
+
+        .airport-sign:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(92, 45, 145, 0.4);
+            border-color: #7b4db8;
+        }
+
+        .airport-sign.selected {
+            border-color: var(--hx-yellow);
+            box-shadow: 0 0 20px rgba(255, 209, 0, 0.4);
+            background: #3a1a6a;
+        }
+
+        .airport-sign.selected::before {
+            background: var(--hx-yellow);
+        }
+
+        .airport-iata {
+            font-size: 22px;
+            color: white;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .airport-name {
+            font-size: 8px;
+            color: #c0a0e0;
+            line-height: 1.6;
+        }
+
+        .airport-sign.selected .airport-name {
+            color: var(--hx-yellow-bright);
+        }
+
+        /* ===== DATE PICKER ===== */
+        .date-picker-scene {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 12px;
+        }
+
+        .cal-nav {
+            background: none;
+            border: 2px solid var(--hx-yellow);
+            color: var(--hx-yellow);
+            font-family: var(--pixel-font);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px 12px;
+            transition: all 0.2s;
+        }
+
+        .cal-nav:hover {
+            background: var(--hx-yellow);
+            color: var(--hx-deep-purple);
+        }
+
+        .cal-month-year {
+            font-size: 14px;
+            color: var(--hx-yellow);
+            min-width: 220px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .cal-day-header {
+            font-size: 9px;
+            color: var(--hx-blue);
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .cal-day {
+            font-size: 10px;
+            text-align: center;
+            padding: 10px 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.15s;
+            color: var(--hx-white);
+        }
+
+        .cal-day:hover:not(.disabled):not(.empty) {
+            border-color: var(--hx-yellow);
+            background: rgba(255, 209, 0, 0.1);
+        }
+
+        .cal-day.selected {
+            background: var(--hx-yellow);
+            color: var(--hx-deep-purple);
+            border-color: var(--hx-yellow-bright);
+            box-shadow: 0 0 10px rgba(255, 209, 0, 0.4);
+        }
+
+        .cal-day.disabled {
+            color: #4a3060;
+            cursor: default;
+        }
+
+        .cal-day.today {
+            border-color: var(--hx-blue);
+        }
+
+        .cal-day.empty {
+            cursor: default;
+        }
+
+        .cal-day.in-range {
+            background: rgba(255, 209, 0, 0.15);
+            border-color: rgba(255, 209, 0, 0.3);
+        }
+
+        /* ===== TIME PICKER - THE STAR ===== */
+        .time-picker-scene {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sky-viewport {
+            width: 100%;
+            height: 220px;
+            border-radius: 12px;
+            border: 3px solid #5C2D91;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+            transition: background 0.5s;
+        }
+
+        /* Sky layers */
+        .sky-sun, .sky-moon {
+            position: absolute;
+            transition: all 0.5s;
+        }
+
+        .sky-sun {
+            width: 40px;
+            height: 40px;
+            background: #FFD100;
+            border-radius: 50%;
+            box-shadow: 0 0 30px #FFD100, 0 0 60px rgba(255, 209, 0, 0.5);
+        }
+
+        .sky-moon {
+            width: 30px;
+            height: 30px;
+            background: #e8e8e8;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(232, 232, 232, 0.5);
+        }
+
+        .sky-moon::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 8px;
+            width: 28px;
+            height: 28px;
+            background: #1a0a2e;
+            border-radius: 50%;
+            transition: background 0.5s;
+        }
+
+        .sky-ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+        }
+
+        .sky-stars {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            transition: opacity 0.5s;
+        }
+
+        .sky-star {
+            position: absolute;
+            background: white;
+            width: 2px;
+            height: 2px;
+        }
+
+        /* Pixel buildings silhouette */
+        .sky-buildings {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .pixel-building {
+            background: #1a0a30;
+            transition: background 0.5s;
+        }
+
+        /* Car on the ground */
+        .sky-car {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        /* Streetlights */
+        .streetlight {
+            position: absolute;
+            bottom: 40px;
+            z-index: 4;
+        }
+
+        .streetlight-glow {
+            width: 60px;
+            height: 40px;
+            background: radial-gradient(ellipse, rgba(255, 209, 0, 0.3), transparent);
+            position: absolute;
+            top: -20px;
+            left: -25px;
+            transition: opacity 0.5s;
+        }
+
+        .time-display {
+            font-size: 32px;
+            color: var(--hx-yellow);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+            margin-bottom: 6px;
+        }
+
+        .time-period {
+            font-size: 11px;
+            color: var(--hx-blue);
+            margin-bottom: 14px;
+        }
+
+        .time-slider-container {
+            width: 100%;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .time-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg,
+                #0a0520 0%,
+                #0a0520 8%,
+                #2e1550 15%,
+                #5C2D91 20%,
+                #d4618c 25%,
+                #FFB55F 30%,
+                #87ceeb 35%,
+                #5ba3e6 50%,
+                #87ceeb 65%,
+                #FFB55F 70%,
+                #d4618c 75%,
+                #5C2D91 82%,
+                #2e1550 88%,
+                #0a0520 95%,
+                #0a0520 100%
+            );
+            border-radius: 10px;
+            outline: none;
+            border: 2px solid #5C2D91;
+            cursor: pointer;
+        }
+
+        .time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 30px;
+            background: var(--hx-yellow);
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid var(--hx-yellow-bright);
+            box-shadow: 0 0 10px rgba(255, 209, 0, 0.5);
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 6px;
+            padding: 0 10px;
+        }
+
+        .time-label {
+            font-size: 7px;
+            color: #9080b0;
+        }
+
+        /* Flexibility band */
+        .flex-band {
+            margin-top: 15px;
+            padding: 10px 16px;
+            background: rgba(0, 176, 166, 0.1);
+            border: 2px solid var(--hx-green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flex-band-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .flex-band-text {
+            font-size: 8px;
+            color: var(--hx-green);
+            line-height: 1.8;
+        }
+
+        .flex-band-text strong {
+            color: var(--hx-yellow-bright);
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-bar {
+            padding: 15px 20px 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn-pixel {
+            font-family: var(--pixel-font);
+            font-size: 12px;
+            padding: 14px 28px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-pixel::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 4px;
+            right: -4px;
+            top: 4px;
+            z-index: -1;
+        }
+
+        .btn-next {
+            background: var(--hx-yellow);
+            color: var(--hx-deep-purple);
+            box-shadow: 4px 4px 0 #c9a200;
+        }
+
+        .btn-next:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #c9a200;
+        }
+
+        .btn-next:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #c9a200;
+        }
+
+        .btn-back {
+            background: #3a1860;
+            color: #c0b0e0;
+            box-shadow: 4px 4px 0 #1a0a30;
+        }
+
+        .btn-back:hover {
+            color: white;
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #1a0a2e;
+        }
+
+        .btn-next:disabled {
+            background: #3a2060;
+            color: #7a6a9a;
+            box-shadow: 4px 4px 0 #1e0c40;
+            cursor: not-allowed;
+        }
+
+        .btn-next:disabled:hover {
+            transform: none;
+            box-shadow: 4px 4px 0 #1e0c40;
+        }
+
+        /* ===== SUMMARY / RESULTS ===== */
+        .summary-panel {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid #5C2D91;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .summary-icon {
+            font-size: 24px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 8px;
+            color: #a090c0;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 11px;
+            color: var(--hx-yellow);
+        }
+
+        .summary-flex {
+            font-size: 8px;
+            color: var(--hx-green);
+            margin-top: 4px;
+        }
+
+        .btn-search {
+            width: 100%;
+            background: var(--hx-yellow);
+            color: var(--hx-deep-purple);
+            font-family: var(--pixel-font);
+            font-size: 14px;
+            padding: 16px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #c9a200;
+            margin-top: 10px;
+            transition: all 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: searchPulse 2s ease-in-out infinite;
+        }
+
+        .btn-search:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #c9a200;
+        }
+
+        @keyframes searchPulse {
+            0%, 100% { box-shadow: 4px 4px 0 #c9a200, 0 0 0 rgba(255, 209, 0, 0); }
+            50% { box-shadow: 4px 4px 0 #c9a200, 0 0 20px rgba(255, 209, 0, 0.3); }
+        }
+
+        /* ===== PIXEL CAR SVG ===== */
+        .pixel-car-container {
+            image-rendering: pixelated;
+        }
+
+        /* ===== SPLASH SCREEN ===== */
+        .splash-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--hx-deep-purple);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+
+        .splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-title {
+            font-size: 32px;
+            color: var(--hx-yellow);
+            text-shadow: 4px 4px 0 #c9a200, 8px 8px 0 rgba(0,0,0,0.3);
+            margin-bottom: 8px;
+            animation: titleBounce 0.6s ease-out;
+        }
+
+        .splash-subtitle {
+            font-size: 11px;
+            color: var(--hx-blue);
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+        }
+
+        .splash-car {
+            margin-bottom: 30px;
+            animation: carBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes carBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes titleBounce {
+            0% { transform: translateY(-30px); opacity: 0; }
+            60% { transform: translateY(5px); }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .btn-start {
+            font-family: var(--pixel-font);
+            font-size: 14px;
+            padding: 16px 40px;
+            background: var(--hx-yellow);
+            color: var(--hx-deep-purple);
+            border: none;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 #c9a200;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: startPulse 2s ease-in-out infinite;
+        }
+
+        .btn-start:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 #c9a200;
+        }
+
+        @keyframes startPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .splash-hx-badge {
+            position: absolute;
+            bottom: 30px;
+            font-size: 8px;
+            color: #8a7ab0;
+            letter-spacing: 2px;
+        }
+
+        /* ===== GROUND ROAD ===== */
+        .ground-road {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #2a1040;
+            overflow: hidden;
+        }
+
+        .ground-road::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--hx-yellow) 0px,
+                var(--hx-yellow) 8px,
+                transparent 8px,
+                transparent 16px
+            );
+            animation: roadScroll 0.8s linear infinite;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .game-title, .splash-title { font-size: 20px; }
+            .airport-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .airport-iata { font-size: 14px; }
+            .sky-viewport { height: 160px; }
+            .time-display { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== STARFIELD ===== -->
+<div class="starfield" id="starfield"></div>
+
+<!-- ===== SPLASH SCREEN ===== -->
+<div class="splash-screen" id="splashScreen">
+    <div class="splash-title">PARKQUEST</div>
+    <div class="splash-subtitle">AIRPORT PARKING SEARCH</div>
+    <div class="splash-car" id="splashCar"></div>
+    <button class="btn-start" onclick="startGame()">START SEARCH</button>
+    <div class="splash-hx-badge">POWERED BY HOLIDAY EXTRAS</div>
+</div>
+
+<!-- ===== MAIN GAME ===== -->
+<div class="game-container" id="gameContainer" style="display:none;">
+    <!-- Header -->
+    <div class="game-header">
+        <div class="game-title">PARKQUEST</div>
+        <div class="game-subtitle">HOLIDAY EXTRAS</div>
+    </div>
+
+    <!-- Progress Road -->
+    <div class="progress-road">
+        <div class="road-surface">
+            <div class="road-dashes"></div>
+        </div>
+        <div class="progress-stops">
+            <div class="progress-stop active" data-step="0" onclick="goToStep(0)">
+                <span>✈</span>
+                <span class="progress-stop-label">AIRPORT</span>
+            </div>
+            <div class="progress-stop" data-step="1" onclick="goToStep(1)">
+                <span>📅</span>
+                <span class="progress-stop-label">DROP OFF</span>
+            </div>
+            <div class="progress-stop" data-step="2" onclick="goToStep(2)">
+                <span>🕐</span>
+                <span class="progress-stop-label">TIME</span>
+            </div>
+            <div class="progress-stop" data-step="3" onclick="goToStep(3)">
+                <span>📅</span>
+                <span class="progress-stop-label">RETURN</span>
+            </div>
+            <div class="progress-stop" data-step="4" onclick="goToStep(4)">
+                <span>🕐</span>
+                <span class="progress-stop-label">TIME</span>
+            </div>
+        </div>
+        <div class="progress-car" id="progressCar"></div>
+    </div>
+
+    <!-- Scene Area -->
+    <div class="scene-area">
+
+        <!-- STEP 0: Airport -->
+        <div class="step-panel active" id="step0">
+            <div class="step-title">CHOOSE YOUR AIRPORT</div>
+            <div class="step-hint">Select where you're flying from</div>
+            <div class="airport-grid" id="airportGrid"></div>
+        </div>
+
+        <!-- STEP 1: Drop-off Date -->
+        <div class="step-panel" id="step1">
+            <div class="step-title">DROP-OFF DATE</div>
+            <div class="step-hint">When do you need to park?</div>
+            <div class="date-picker-scene" id="dropoffCalendar"></div>
+        </div>
+
+        <!-- STEP 2: Drop-off Time -->
+        <div class="step-panel" id="step2">
+            <div class="step-title">DROP-OFF TIME</div>
+            <div class="step-hint">What time will you arrive at the car park?</div>
+            <div class="time-picker-scene" id="dropoffTimePicker"></div>
+        </div>
+
+        <!-- STEP 3: Return Date -->
+        <div class="step-panel" id="step3">
+            <div class="step-title">RETURN DATE</div>
+            <div class="step-hint">When do you fly home?</div>
+            <div class="date-picker-scene" id="returnCalendar"></div>
+        </div>
+
+        <!-- STEP 4: Return Time -->
+        <div class="step-panel" id="step4">
+            <div class="step-title">COLLECTION TIME</div>
+            <div class="step-hint">What time does your flight land?</div>
+            <div class="time-picker-scene" id="returnTimePicker"></div>
+        </div>
+
+        <!-- STEP 5: Summary -->
+        <div class="step-panel" id="step5">
+            <div class="step-title">YOUR SEARCH</div>
+            <div class="step-hint">Ready to find the best deals?</div>
+            <div class="summary-panel" id="summaryPanel"></div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-bar" id="actionBar">
+        <button class="btn-pixel btn-back" id="btnBack" onclick="prevStep()" style="display:none;">← BACK</button>
+        <button class="btn-pixel btn-next" id="btnNext" onclick="nextStep()" disabled>NEXT →</button>
+    </div>
+</div>
+
+<script>
+// ===== STATE =====
+const state = {
+    step: 0,
+    airport: null,
+    dropoffDate: null,
+    dropoffTime: 10,
+    returnDate: null,
+    returnTime: 16,
+    calendarMonth: new Date().getMonth(),
+    calendarYear: new Date().getFullYear(),
+    returnCalendarMonth: null,
+    returnCalendarYear: null,
+};
+
+const AIRPORTS = [
+    { iata: 'LHR', name: 'London Heathrow' },
+    { iata: 'LGW', name: 'London Gatwick' },
+    { iata: 'STN', name: 'London Stansted' },
+    { iata: 'LTN', name: 'London Luton' },
+    { iata: 'MAN', name: 'Manchester' },
+    { iata: 'BHX', name: 'Birmingham' },
+];
+
+const TIME_PERIODS = [
+    { min: 0, max: 4, label: 'LATE NIGHT', color: '#0a0520' },
+    { min: 5, max: 6, label: 'EARLY MORNING', color: '#2e1550' },
+    { min: 7, max: 8, label: 'SUNRISE', color: '#d4618c' },
+    { min: 9, max: 11, label: 'MORNING', color: '#87ceeb' },
+    { min: 12, max: 13, label: 'MIDDAY', color: '#5ba3e6' },
+    { min: 14, max: 16, label: 'AFTERNOON', color: '#87ceeb' },
+    { min: 17, max: 18, label: 'SUNSET', color: '#FFB55F' },
+    { min: 19, max: 20, label: 'EVENING', color: '#3a1568' },
+    { min: 21, max: 23, label: 'NIGHT', color: '#0a0520' },
+];
+
+const MONTH_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+// ===== INIT =====
+function init() {
+    createStarfield();
+    createSplashCar();
+    createProgressCar();
+    renderAirports();
+}
+
+// ===== STARFIELD =====
+function createStarfield() {
+    const sf = document.getElementById('starfield');
+    for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        const size = Math.random() * 2 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.setProperty('--dur', (Math.random() * 3 + 2) + 's');
+        star.style.animationDelay = Math.random() * 3 + 's';
+        sf.appendChild(star);
+    }
+}
+
+// ===== PIXEL CAR (SVG) =====
+function createPixelCar(w = 60, h = 24) {
+    // 16-bit style red sports car
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.setAttribute('viewBox', '0 0 30 12');
+    svg.style.imageRendering = 'pixelated';
+
+    const pixels = [
+        // Body (red)
+        { x: 4, y: 4, c: '#4B2080' }, { x: 5, y: 4, c: '#4B2080' }, { x: 6, y: 4, c: '#4B2080' },
+        { x: 7, y: 4, c: '#4B2080' }, { x: 8, y: 4, c: '#4B2080' }, { x: 9, y: 4, c: '#4B2080' },
+        { x: 10, y: 4, c: '#4B2080' }, { x: 11, y: 4, c: '#4B2080' }, { x: 12, y: 4, c: '#4B2080' },
+        { x: 13, y: 4, c: '#4B2080' }, { x: 14, y: 4, c: '#4B2080' }, { x: 15, y: 4, c: '#4B2080' },
+        { x: 16, y: 4, c: '#4B2080' }, { x: 17, y: 4, c: '#4B2080' }, { x: 18, y: 4, c: '#4B2080' },
+        { x: 19, y: 4, c: '#4B2080' }, { x: 20, y: 4, c: '#4B2080' }, { x: 21, y: 4, c: '#4B2080' },
+        { x: 22, y: 4, c: '#4B2080' }, { x: 23, y: 4, c: '#4B2080' },
+        // Body row 2
+        { x: 2, y: 5, c: '#4B2080' }, { x: 3, y: 5, c: '#4B2080' }, { x: 4, y: 5, c: '#5C2D91' },
+        { x: 5, y: 5, c: '#5C2D91' }, { x: 6, y: 5, c: '#5C2D91' }, { x: 7, y: 5, c: '#5C2D91' },
+        { x: 8, y: 5, c: '#5C2D91' }, { x: 9, y: 5, c: '#5C2D91' }, { x: 10, y: 5, c: '#5C2D91' },
+        { x: 11, y: 5, c: '#5C2D91' }, { x: 12, y: 5, c: '#5C2D91' }, { x: 13, y: 5, c: '#5C2D91' },
+        { x: 14, y: 5, c: '#5C2D91' }, { x: 15, y: 5, c: '#5C2D91' }, { x: 16, y: 5, c: '#5C2D91' },
+        { x: 17, y: 5, c: '#5C2D91' }, { x: 18, y: 5, c: '#5C2D91' }, { x: 19, y: 5, c: '#5C2D91' },
+        { x: 20, y: 5, c: '#5C2D91' }, { x: 21, y: 5, c: '#5C2D91' }, { x: 22, y: 5, c: '#5C2D91' },
+        { x: 23, y: 5, c: '#5C2D91' }, { x: 24, y: 5, c: '#4B2080' }, { x: 25, y: 5, c: '#4B2080' },
+        // Body row 3
+        { x: 1, y: 6, c: '#dd2200' }, { x: 2, y: 6, c: '#5C2D91' }, { x: 3, y: 6, c: '#5C2D91' },
+        { x: 4, y: 6, c: '#7B4DB8' }, { x: 5, y: 6, c: '#7B4DB8' }, { x: 6, y: 6, c: '#7B4DB8' },
+        { x: 7, y: 6, c: '#7B4DB8' }, { x: 8, y: 6, c: '#7B4DB8' }, { x: 9, y: 6, c: '#7B4DB8' },
+        { x: 10, y: 6, c: '#7B4DB8' }, { x: 11, y: 6, c: '#7B4DB8' }, { x: 12, y: 6, c: '#7B4DB8' },
+        { x: 13, y: 6, c: '#7B4DB8' }, { x: 14, y: 6, c: '#7B4DB8' }, { x: 15, y: 6, c: '#7B4DB8' },
+        { x: 16, y: 6, c: '#7B4DB8' }, { x: 17, y: 6, c: '#7B4DB8' }, { x: 18, y: 6, c: '#7B4DB8' },
+        { x: 19, y: 6, c: '#7B4DB8' }, { x: 20, y: 6, c: '#7B4DB8' }, { x: 21, y: 6, c: '#7B4DB8' },
+        { x: 22, y: 6, c: '#7B4DB8' }, { x: 23, y: 6, c: '#7B4DB8' }, { x: 24, y: 6, c: '#5C2D91' },
+        { x: 25, y: 6, c: '#5C2D91' }, { x: 26, y: 6, c: '#dd2200' },
+        // Windows (light blue)
+        { x: 8, y: 3, c: '#88ccff' }, { x: 9, y: 3, c: '#88ccff' }, { x: 10, y: 3, c: '#88ccff' },
+        { x: 11, y: 3, c: '#88ccff' }, { x: 13, y: 3, c: '#66aadd' }, { x: 14, y: 3, c: '#66aadd' },
+        { x: 15, y: 3, c: '#66aadd' }, { x: 16, y: 3, c: '#66aadd' }, { x: 17, y: 3, c: '#66aadd' },
+        // Roof
+        { x: 7, y: 2, c: '#4B2080' }, { x: 8, y: 2, c: '#4B2080' }, { x: 9, y: 2, c: '#4B2080' },
+        { x: 10, y: 2, c: '#4B2080' }, { x: 11, y: 2, c: '#4B2080' }, { x: 12, y: 2, c: '#4B2080' },
+        { x: 13, y: 2, c: '#4B2080' }, { x: 14, y: 2, c: '#4B2080' }, { x: 15, y: 2, c: '#4B2080' },
+        { x: 16, y: 2, c: '#4B2080' }, { x: 17, y: 2, c: '#4B2080' }, { x: 18, y: 2, c: '#4B2080' },
+        // Lower body
+        { x: 1, y: 7, c: '#3A1568' }, { x: 2, y: 7, c: '#3A1568' }, { x: 3, y: 7, c: '#3A1568' },
+        { x: 4, y: 7, c: '#3A1568' }, { x: 5, y: 7, c: '#3A1568' }, { x: 6, y: 7, c: '#3A1568' },
+        { x: 7, y: 7, c: '#3A1568' }, { x: 8, y: 7, c: '#3A1568' }, { x: 9, y: 7, c: '#3A1568' },
+        { x: 10, y: 7, c: '#3A1568' }, { x: 11, y: 7, c: '#3A1568' }, { x: 12, y: 7, c: '#3A1568' },
+        { x: 13, y: 7, c: '#3A1568' }, { x: 14, y: 7, c: '#3A1568' }, { x: 15, y: 7, c: '#3A1568' },
+        { x: 16, y: 7, c: '#3A1568' }, { x: 17, y: 7, c: '#3A1568' }, { x: 18, y: 7, c: '#3A1568' },
+        { x: 19, y: 7, c: '#3A1568' }, { x: 20, y: 7, c: '#3A1568' }, { x: 21, y: 7, c: '#3A1568' },
+        { x: 22, y: 7, c: '#3A1568' }, { x: 23, y: 7, c: '#3A1568' }, { x: 24, y: 7, c: '#3A1568' },
+        { x: 25, y: 7, c: '#3A1568' }, { x: 26, y: 7, c: '#3A1568' },
+        // Wheels
+        { x: 5, y: 8, c: '#333' }, { x: 6, y: 8, c: '#333' }, { x: 7, y: 8, c: '#333' },
+        { x: 5, y: 9, c: '#333' }, { x: 6, y: 9, c: '#555' }, { x: 7, y: 9, c: '#333' },
+        { x: 5, y: 10, c: '#333' }, { x: 6, y: 10, c: '#333' }, { x: 7, y: 10, c: '#333' },
+        { x: 20, y: 8, c: '#333' }, { x: 21, y: 8, c: '#333' }, { x: 22, y: 8, c: '#333' },
+        { x: 20, y: 9, c: '#333' }, { x: 21, y: 9, c: '#555' }, { x: 22, y: 9, c: '#333' },
+        { x: 20, y: 10, c: '#333' }, { x: 21, y: 10, c: '#333' }, { x: 22, y: 10, c: '#333' },
+        // Headlights
+        { x: 26, y: 5, c: '#FFD100' }, { x: 27, y: 5, c: '#FFD100' },
+        { x: 26, y: 6, c: '#FFD100' }, { x: 27, y: 6, c: '#FFE44C' },
+        // Tail lights
+        { x: 1, y: 5, c: '#FF5F68' }, { x: 0, y: 6, c: '#FF5F68' },
+    ];
+
+    pixels.forEach(p => {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', p.x);
+        rect.setAttribute('y', p.y);
+        rect.setAttribute('width', 1);
+        rect.setAttribute('height', 1);
+        rect.setAttribute('fill', p.c);
+        svg.appendChild(rect);
+    });
+
+    return svg;
+}
+
+function createSplashCar() {
+    document.getElementById('splashCar').appendChild(createPixelCar(180, 72));
+}
+
+function createProgressCar() {
+    document.getElementById('progressCar').appendChild(createPixelCar(50, 20));
+}
+
+// ===== GAME FLOW =====
+function startGame() {
+    document.getElementById('splashScreen').classList.add('hidden');
+    setTimeout(() => {
+        document.getElementById('gameContainer').style.display = 'flex';
+        updateProgress();
+    }, 500);
+}
+
+function updateProgress() {
+    const stops = document.querySelectorAll('.progress-stop');
+    stops.forEach((s, i) => {
+        s.classList.remove('active', 'completed');
+        if (i < state.step) s.classList.add('completed');
+        if (i === state.step) s.classList.add('active');
+    });
+
+    // Move car
+    const car = document.getElementById('progressCar');
+    const roadWidth = document.querySelector('.progress-stops').offsetWidth;
+    const stopPositions = [0, 0.25, 0.5, 0.75, 1];
+    const pos = state.step <= 4 ? stopPositions[state.step] : 1;
+    car.style.left = `calc(5% + ${pos * roadWidth}px - 20px)`;
+
+    // Update buttons
+    document.getElementById('btnBack').style.display = state.step > 0 ? 'inline-block' : 'none';
+    const btnNext = document.getElementById('btnNext');
+
+    if (state.step === 5) {
+        document.getElementById('actionBar').innerHTML = '';
+    } else {
+        btnNext.textContent = state.step === 4 ? 'REVIEW →' : 'NEXT →';
+    }
+
+    updateNextButton();
+}
+
+function updateNextButton() {
+    const btn = document.getElementById('btnNext');
+    if (!btn) return;
+
+    switch (state.step) {
+        case 0: btn.disabled = !state.airport; break;
+        case 1: btn.disabled = !state.dropoffDate; break;
+        case 2: btn.disabled = false; break;
+        case 3: btn.disabled = !state.returnDate; break;
+        case 4: btn.disabled = false; break;
+    }
+}
+
+function goToStep(n) {
+    // Only allow going to completed steps or current step
+    if (n > state.step) return;
+    state.step = n;
+    showStep(n);
+    updateProgress();
+}
+
+function nextStep() {
+    if (state.step < 5) {
+        state.step++;
+        showStep(state.step);
+        updateProgress();
+    }
+}
+
+function prevStep() {
+    if (state.step > 0) {
+        state.step--;
+        showStep(state.step);
+        updateProgress();
+    }
+}
+
+function showStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('step' + n);
+    if (panel) {
+        panel.classList.add('active');
+        // Re-trigger animation
+        panel.style.animation = 'none';
+        panel.offsetHeight;
+        panel.style.animation = '';
+    }
+
+    // Initialize step content
+    if (n === 1) renderCalendar('dropoffCalendar', 'dropoff');
+    if (n === 2) renderTimePicker('dropoffTimePicker', 'dropoff');
+    if (n === 3) {
+        if (!state.returnCalendarMonth) {
+            if (state.dropoffDate) {
+                state.returnCalendarMonth = state.dropoffDate.getMonth();
+                state.returnCalendarYear = state.dropoffDate.getFullYear();
+            } else {
+                state.returnCalendarMonth = state.calendarMonth;
+                state.returnCalendarYear = state.calendarYear;
+            }
+        }
+        renderCalendar('returnCalendar', 'return');
+    }
+    if (n === 4) renderTimePicker('returnTimePicker', 'return');
+    if (n === 5) renderSummary();
+}
+
+// ===== AIRPORT SELECTION =====
+function renderAirports() {
+    const grid = document.getElementById('airportGrid');
+    grid.innerHTML = '';
+    AIRPORTS.forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'airport-sign' + (state.airport === a.iata ? ' selected' : '');
+        div.innerHTML = `
+            <span class="airport-iata">${a.iata}</span>
+            <span class="airport-name">${a.name}</span>
+        `;
+        div.onclick = () => selectAirport(a.iata, div);
+        grid.appendChild(div);
+    });
+}
+
+function selectAirport(iata, el) {
+    state.airport = iata;
+    document.querySelectorAll('.airport-sign').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    updateNextButton();
+
+    // Auto-advance from airport step
+    setTimeout(() => nextStep(), 400);
+}
+
+// ===== CALENDAR =====
+function renderCalendar(containerId, type) {
+    const container = document.getElementById(containerId);
+    const month = type === 'return' ? state.returnCalendarMonth : state.calendarMonth;
+    const year = type === 'return' ? state.returnCalendarYear : state.calendarYear;
+    const selectedDate = type === 'return' ? state.returnDate : state.dropoffDate;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    let html = `
+        <div class="calendar-header">
+            <button class="cal-nav" onclick="calNav('${type}', -1)">◀</button>
+            <div class="cal-month-year">${MONTH_NAMES[month]} ${year}</div>
+            <button class="cal-nav" onclick="calNav('${type}', 1)">▶</button>
+        </div>
+        <div class="calendar-grid">
+    `;
+
+    DAY_NAMES.forEach(d => {
+        html += `<div class="cal-day-header">${d}</div>`;
+    });
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        html += `<div class="cal-day empty"></div>`;
+    }
+
+    // Days
+    for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, month, d);
+        let classes = 'cal-day';
+
+        // Disable past dates
+        let minDate = new Date(today);
+        if (type === 'return' && state.dropoffDate) {
+            minDate = new Date(state.dropoffDate);
+        }
+
+        if (date < minDate) {
+            classes += ' disabled';
+        }
+
+        // Today marker
+        if (date.getTime() === today.getTime()) {
+            classes += ' today';
+        }
+
+        // Selected
+        if (selectedDate && date.getTime() === selectedDate.getTime()) {
+            classes += ' selected';
+        }
+
+        // In range (between dropoff and return)
+        if (state.dropoffDate && state.returnDate) {
+            if (date > state.dropoffDate && date < state.returnDate) {
+                classes += ' in-range';
+            }
+        }
+
+        const disabled = date < minDate;
+        html += `<div class="${classes}" ${disabled ? '' : `onclick="selectDate('${type}', ${year}, ${month}, ${d})"`}>${d}</div>`;
+    }
+
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+function calNav(type, dir) {
+    if (type === 'return') {
+        state.returnCalendarMonth += dir;
+        if (state.returnCalendarMonth > 11) { state.returnCalendarMonth = 0; state.returnCalendarYear++; }
+        if (state.returnCalendarMonth < 0) { state.returnCalendarMonth = 11; state.returnCalendarYear--; }
+        renderCalendar('returnCalendar', 'return');
+    } else {
+        state.calendarMonth += dir;
+        if (state.calendarMonth > 11) { state.calendarMonth = 0; state.calendarYear++; }
+        if (state.calendarMonth < 0) { state.calendarMonth = 11; state.calendarYear--; }
+        renderCalendar('dropoffCalendar', 'dropoff');
+    }
+}
+
+function selectDate(type, y, m, d) {
+    const date = new Date(y, m, d);
+    if (type === 'return') {
+        state.returnDate = date;
+        renderCalendar('returnCalendar', 'return');
+    } else {
+        state.dropoffDate = date;
+        // Reset return date if it's before dropoff
+        if (state.returnDate && state.returnDate < date) {
+            state.returnDate = null;
+        }
+        renderCalendar('dropoffCalendar', 'dropoff');
+    }
+    updateNextButton();
+}
+
+// ===== TIME PICKER =====
+function renderTimePicker(containerId, type) {
+    const container = document.getElementById(containerId);
+    const timeValue = type === 'return' ? state.returnTime : state.dropoffTime;
+
+    const isReturn = type === 'return';
+    const earlyHours = isReturn ? 3 : 3;
+    const lateHours = isReturn ? 6 : 3;
+
+    container.innerHTML = `
+        <div class="sky-viewport" id="sky_${type}">
+            <div class="sky-stars" id="stars_${type}"></div>
+            <div class="sky-sun" id="sun_${type}"></div>
+            <div class="sky-moon" id="moon_${type}"></div>
+            <div class="sky-buildings" id="buildings_${type}"></div>
+            <div class="sky-car" id="skycar_${type}"></div>
+        </div>
+        <div class="time-display" id="timeDisplay_${type}">${formatTime(timeValue)}</div>
+        <div class="time-period" id="timePeriod_${type}">${getTimePeriod(timeValue)}</div>
+        <div class="time-slider-container">
+            <input type="range" class="time-slider" min="0" max="23" value="${timeValue}"
+                   oninput="updateTime('${type}', this.value)">
+            <div class="time-labels">
+                <span class="time-label">MIDNIGHT</span>
+                <span class="time-label">6 AM</span>
+                <span class="time-label">NOON</span>
+                <span class="time-label">6 PM</span>
+                <span class="time-label">MIDNIGHT</span>
+            </div>
+        </div>
+        <div class="flex-band">
+            <div class="flex-band-icon">🛡️</div>
+            <div class="flex-band-text">
+                ${isReturn
+                    ? '<strong>RELAX!</strong> Arrive up to 3hrs early or 6hrs late — no extra charge.'
+                    : '<strong>FLEXIBLE!</strong> You can drop off up to 3hrs either side — no stress.'}
+            </div>
+        </div>
+    `;
+
+    // Add stars to sky
+    const starsDiv = document.getElementById(`stars_${type}`);
+    for (let i = 0; i < 25; i++) {
+        const star = document.createElement('div');
+        star.className = 'sky-star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 60 + '%';
+        starsDiv.appendChild(star);
+    }
+
+    // Add pixel buildings
+    const buildingsDiv = document.getElementById(`buildings_${type}`);
+    const buildingWidths = [20, 12, 25, 15, 30, 10, 18, 22, 14, 28, 16];
+    const buildingHeights = [35, 20, 45, 25, 30, 15, 40, 28, 22, 38, 20];
+    buildingWidths.forEach((w, i) => {
+        const b = document.createElement('div');
+        b.className = 'pixel-building';
+        b.style.width = w + 'px';
+        b.style.height = buildingHeights[i] + 'px';
+        buildingsDiv.appendChild(b);
+    });
+
+    // Add car
+    document.getElementById(`skycar_${type}`).appendChild(createPixelCar(80, 32));
+
+    // Initial sky update
+    updateSky(type, timeValue);
+}
+
+function updateTime(type, val) {
+    const v = parseInt(val);
+    if (type === 'return') {
+        state.returnTime = v;
+    } else {
+        state.dropoffTime = v;
+    }
+    document.getElementById(`timeDisplay_${type}`).textContent = formatTime(v);
+    document.getElementById(`timePeriod_${type}`).textContent = getTimePeriod(v);
+    updateSky(type, v);
+}
+
+function updateSky(type, hour) {
+    const viewport = document.getElementById(`sky_${type}`);
+    const sun = document.getElementById(`sun_${type}`);
+    const moon = document.getElementById(`moon_${type}`);
+    const starsDiv = document.getElementById(`stars_${type}`);
+
+    // Sky gradient based on time
+    let skyTop, skyBottom, groundColor;
+    if (hour >= 0 && hour < 5) {
+        skyTop = '#0a0520'; skyBottom = '#1a0a2e'; groundColor = '#110a18';
+    } else if (hour >= 5 && hour < 7) {
+        skyTop = '#2e1550'; skyBottom = '#d4618c'; groundColor = '#2a1530';
+    } else if (hour >= 7 && hour < 9) {
+        skyTop = '#4a90cc'; skyBottom = '#FFB55F'; groundColor = '#3a5a3a';
+    } else if (hour >= 9 && hour < 12) {
+        skyTop = '#4a90d9'; skyBottom = '#87ceeb'; groundColor = '#4a7a4a';
+    } else if (hour >= 12 && hour < 15) {
+        skyTop = '#2a70c0'; skyBottom = '#87ceeb'; groundColor = '#4a7a4a';
+    } else if (hour >= 15 && hour < 17) {
+        skyTop = '#4a90cc'; skyBottom = '#87ceeb'; groundColor = '#4a7a4a';
+    } else if (hour >= 17 && hour < 19) {
+        skyTop = '#cc6644'; skyBottom = '#FFB55F'; groundColor = '#3a3050';
+    } else if (hour >= 19 && hour < 21) {
+        skyTop = '#3a1568'; skyBottom = '#d4618c'; groundColor = '#1a0a2e';
+    } else {
+        skyTop = '#0a0520'; skyBottom = '#1a0a2e'; groundColor = '#110a18';
+    }
+
+    viewport.style.background = `linear-gradient(180deg, ${skyTop} 0%, ${skyBottom} 70%, ${groundColor} 100%)`;
+
+    // Sun position (arc from 6am to 6pm)
+    const isDaytime = hour >= 6 && hour <= 19;
+    if (isDaytime) {
+        const progress = (hour - 6) / 13;
+        const x = 10 + progress * 80;
+        const y = 80 - Math.sin(progress * Math.PI) * 70;
+        sun.style.left = x + '%';
+        sun.style.top = y + '%';
+        sun.style.opacity = hour >= 7 && hour <= 18 ? '1' : '0.6';
+        sun.style.display = 'block';
+    } else {
+        sun.style.display = 'none';
+    }
+
+    // Moon
+    const isNight = hour < 6 || hour > 19;
+    if (isNight) {
+        const nightHour = hour > 19 ? hour - 19 : hour + 5;
+        const progress = nightHour / 11;
+        const x = 10 + progress * 80;
+        const y = 60 - Math.sin(progress * Math.PI) * 50;
+        moon.style.left = x + '%';
+        moon.style.top = y + '%';
+        moon.style.display = 'block';
+    } else {
+        moon.style.display = 'none';
+    }
+
+    // Stars visibility
+    starsDiv.style.opacity = isNight ? '1' : hour < 8 || hour > 18 ? '0.3' : '0';
+
+    // Building darkness
+    const buildings = viewport.querySelectorAll('.pixel-building');
+    buildings.forEach(b => {
+        b.style.background = isDaytime ? '#2a2050' : '#0a0520';
+    });
+}
+
+function formatTime(h) {
+    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    const ampm = h < 12 ? 'AM' : 'PM';
+    return `${hour12}:00 ${ampm}`;
+}
+
+function getTimePeriod(h) {
+    for (const p of TIME_PERIODS) {
+        if (h >= p.min && h <= p.max) return p.label;
+    }
+    return '';
+}
+
+// ===== SUMMARY =====
+function renderSummary() {
+    const panel = document.getElementById('summaryPanel');
+    const airport = AIRPORTS.find(a => a.iata === state.airport);
+
+    const dropoffStr = state.dropoffDate ? formatDate(state.dropoffDate) : '—';
+    const returnStr = state.returnDate ? formatDate(state.returnDate) : '—';
+
+    // Calculate days
+    let daysText = '';
+    if (state.dropoffDate && state.returnDate) {
+        const days = Math.ceil((state.returnDate - state.dropoffDate) / (1000 * 60 * 60 * 24));
+        daysText = `${days} day${days !== 1 ? 's' : ''} of parking`;
+    }
+
+    panel.innerHTML = `
+        <div class="summary-card">
+            <div class="summary-icon">✈️</div>
+            <div>
+                <div class="summary-label">AIRPORT</div>
+                <div class="summary-value">${airport ? airport.iata + ' — ' + airport.name : '—'}</div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">📅</div>
+            <div>
+                <div class="summary-label">DROP OFF</div>
+                <div class="summary-value">${dropoffStr} at ${formatTime(state.dropoffTime)}</div>
+                <div class="summary-flex">± 3 hours flexibility</div>
+            </div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-icon">🔙</div>
+            <div>
+                <div class="summary-label">RETURN</div>
+                <div class="summary-value">${returnStr} at ${formatTime(state.returnTime)}</div>
+                <div class="summary-flex">3hrs early / 6hrs late — no charge</div>
+            </div>
+        </div>
+        ${daysText ? `<div class="summary-card">
+            <div class="summary-icon">🅿️</div>
+            <div>
+                <div class="summary-label">DURATION</div>
+                <div class="summary-value">${daysText}</div>
+            </div>
+        </div>` : ''}
+        <button class="btn-search" onclick="searchParking()">
+            🔍 FIND PARKING DEALS
+        </button>
+    `;
+
+    // Hide action bar on summary
+    document.getElementById('actionBar').style.display = 'none';
+}
+
+function formatDate(d) {
+    const day = d.getDate();
+    const suffix = ['th','st','nd','rd'][day % 10 > 3 ? 0 : (day % 100 - day % 10 !== 10) * day % 10];
+    return `${DAY_NAMES[d.getDay()]} ${day}${suffix} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function toLocalDateStr(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function searchParking() {
+    const depart = state.airport;
+    const inDate = toLocalDateStr(state.dropoffDate);
+    const outDate = toLocalDateStr(state.returnDate);
+    const parkFrom = encodeURIComponent(`${String(state.dropoffTime).padStart(2, '0')}:00`);
+    const parkTo = encodeURIComponent(`${String(state.returnTime).padStart(2, '0')}:00`);
+
+    const url = `http://www.holidayextras.com/en/static/?selectProduct=cp&#/carpark?agent=WEB1&lang=en&adults=2&depart=${depart}&in=${inDate}&out=${outDate}&park_from=${parkFrom}&park_to=${parkTo}&adults=2`;
+
+    window.location.href = url;
+}
+
+// ===== GO =====
+init();
+</script>
+</body>
+</html>
