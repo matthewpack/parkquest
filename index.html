@@ -1602,13 +1602,35 @@ function toLocalDateStr(d) {
 }
 
 function searchParking() {
-    const depart = state.airport;
-    const inDate = toLocalDateStr(state.dropoffDate);
-    const outDate = toLocalDateStr(state.returnDate);
-    const parkFrom = encodeURIComponent(`${String(state.dropoffTime).padStart(2, '0')}:00`);
-    const parkTo = encodeURIComponent(`${String(state.returnTime).padStart(2, '0')}:00`);
+    function toDDMMYY(d) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = String(d.getFullYear()).slice(2);
+        return encodeURIComponent(`${day}/${month}/${year}`);
+    }
 
-    const url = `http://www.holidayextras.com/en/static/?selectProduct=cp&#/carpark?agent=WEB1&lang=en&adults=2&depart=${depart}&in=${inDate}&out=${outDate}&park_from=${parkFrom}&park_to=${parkTo}&adults=2`;
+    function toHumanDate(d) {
+        const day = d.getDate();
+        const suffix = ['th','st','nd','rd'][day % 10 > 3 ? 0 : (day % 100 - day % 10 !== 10) * day % 10];
+        const dayName = DAY_NAMES[d.getDay()][0] + DAY_NAMES[d.getDay()].slice(1).toLowerCase();
+        const monthName = MONTH_NAMES[d.getMonth()][0] + MONTH_NAMES[d.getMonth()].slice(1).toLowerCase();
+        const year = String(d.getFullYear()).slice(2);
+        return `${dayName}+${day}${suffix}+${monthName}+${year}`;
+    }
+
+    function toHHMM(h) {
+        return `${String(h).padStart(2, '0')}00`;
+    }
+
+    const location = state.airport;
+    const arrivalDate = toDDMMYY(state.dropoffDate);
+    const departDate = toDDMMYY(state.returnDate);
+    const arrivalFormatted = toHumanDate(state.dropoffDate);
+    const departFormatted = toHumanDate(state.returnDate);
+    const arrivalTime = toHHMM(state.dropoffTime);
+    const departTime = toHHMM(state.returnTime);
+
+    const url = `https://www.holidayextras.com/static/?Referer=https%3A%2F%2Fwww.holidayextras.com%2F&agent=WEB1&domain=www.holidayextras.com&lang=en&product=cp&request=1&rule_set=hx&selectProduct=cp&tc=1&search=&Location=${location}&Arrival=${arrivalFormatted}&ArrivalDate=${arrivalDate}&ArrivalTime=${arrivalTime}&Depart=${departFormatted}&DepartDate=${departDate}&DepartTime=${departTime}&flightTime=&flight_number=default&terminal=&CampaignID=65642`;
 
     window.location.href = url;
 }
